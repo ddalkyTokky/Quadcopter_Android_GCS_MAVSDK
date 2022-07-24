@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">GoogleMapMavsdk</string>
+    <string name="title_activity_maps">MapsActivity</string>
+
+    <string name="str_usb_device_not_found">USB device not found</string>
+    <string name="str_usb_permission_not_granted">USB permission not granted</string>
+</resources>
