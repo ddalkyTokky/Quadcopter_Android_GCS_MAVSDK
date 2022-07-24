@@ -50,6 +50,9 @@ import io.reactivex.Flowable;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
+import android.os.Handler;
+import android.os.Looper;
+
 public class DroneRepository {
     private static final String TAG = "LOG_" + DroneRepository.class.getSimpleName();
 
@@ -91,18 +94,22 @@ public class DroneRepository {
 
     private UsbSerialPort mUsbSerialPort;
 
-    private static final float MISSION_HEIGHT = 0.3f;
-    private static final float MISSION_SPEED = 0.3f;
+    private static final float MISSION_HEIGHT = 0.5f;
+    private static final float MISSION_SPEED = 0.9f;
 
     private String completeErrorMessage;
 
     ExecutorService mExecutorService;
+
+    private final Handler mainLooper;
 
     public DroneRepository(Application application) {
         mAppContext = application.getApplicationContext();
         mCompositeDisposable = new CompositeDisposable();
 
         connect();
+
+        mainLooper = new Handler(Looper.getMainLooper());
     }
 
     public void connect() {
@@ -138,7 +145,7 @@ public class DroneRepository {
             e.printStackTrace();
         }
 
-        mMavsdkServer.stop();
+        //mMavsdkServer.stop();
         mDrone.dispose();
 
         /*
@@ -208,7 +215,10 @@ public class DroneRepository {
 
             @Override
             public void onRunError(Exception e) {
-                disconnect();
+                mainLooper.post(() -> {
+                    Toast.makeText(mAppContext, "Serial Error", Toast.LENGTH_SHORT).show();
+                    disconnect();
+                });
             }
         });
 
@@ -221,7 +231,10 @@ public class DroneRepository {
 
             @Override
             public void onRunError(Exception e) {
-                disconnect();
+                mainLooper.post(() -> {
+                    Toast.makeText(mAppContext, "Tcp Error", Toast.LENGTH_SHORT).show();
+                    disconnect();
+                });
             }
         });
 
