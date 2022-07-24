@@ -295,7 +295,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (geofenceLatLngs.size() >= 1) {
                     mDroneRepository.setGeofence(geofenceLatLngs);
                 } else {
-                    Toast.makeText(getApplication(), "No Mission Item", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplication(), "No Geofence Item", Toast.LENGTH_SHORT).show();
                 }
                 break;
             case R.id.clearGeofence:
