@@ -58,6 +58,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private static final float ZOOM_SCALE = 17f;
     private static final float MISSION_MARKER_COLOR = 180f;
+    private static float TAKEOFF_HEIGHT = 0.7f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -150,10 +151,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             case R.id.arm:
                 mDroneRepository.arm();
                 break;
-            case R.id.setTakeoffAltitude:
-                mDroneRepository.setTakeoffAltitude();
             case R.id.takeoff:
-                mDroneRepository.takeoff();
+                mDroneRepository.takeoff(TAKEOFF_HEIGHT);
                 break;
             case R.id.kill:
                 mDroneRepository.kill();

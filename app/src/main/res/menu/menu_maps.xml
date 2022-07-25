@@ -12,8 +12,6 @@
         android:title="PrintErrorMessage"/>
     <item android:id="@+id/arm"
         android:title="Arm"/>
-    <item android:id="@+id/setTakeoffAltitude"
-        android:title="SetTakeoffAltitude"/>
     <item android:id="@+id/takeoff"
         android:title="Takeoff"/>
     <item android:id="@+id/land"

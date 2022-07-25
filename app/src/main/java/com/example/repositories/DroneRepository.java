@@ -277,31 +277,31 @@ public class DroneRepository {
                 .subscribe(latch::getCount, throwable -> latch.getCount());
     }
 
-    public void setTakeoffAltitude() {
+    public void takeoff(float height) {
         if (usbConnectionStatus == false) {
             Toast.makeText(mAppContext, "Usb not connected", Toast.LENGTH_SHORT).show();
             return;
         }
-        mDrone.getAction()
-                .setTakeoffAltitude(MISSION_HEIGHT)
-                .doOnComplete(() ->
-                        completeErrorMessage = "Setting Takeoff Alt Done")
-                .doOnError(throwable ->
-                        completeErrorMessage = ((Action.ActionException) throwable).getCode().toString())
-                .subscribe(latch::getCount, throwable -> latch.getCount());
-    }
 
-    public void takeoff() {
-        if (usbConnectionStatus == false) {
-            Toast.makeText(mAppContext, "Usb not connected", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        mDrone.getAction()
-                .takeoff()
+        mDrone.getAction().arm()
                 .doOnComplete(() ->
-                        completeErrorMessage = "Setting Takeoff Alt Done")
+                        completeErrorMessage = "Arming Done")
                 .doOnError(throwable ->
-                        completeErrorMessage = ((Action.ActionException) throwable).getCode().toString())
+                        completeErrorMessage = "Arm Error: " + ((Action.ActionException) throwable).getCode().toString())
+                .andThen(mDrone.getAction()
+                        .setTakeoffAltitude(height)
+                        .doOnComplete(() ->
+                                completeErrorMessage = "Setting Takeoff Alt Done")
+                        .doOnError(throwable ->
+                                completeErrorMessage
+                                        = "Setting Takeoff Alt Error: "
+                                                + ((Action.ActionException) throwable).getCode().toString()))
+                .andThen(mDrone.getAction()
+                        .takeoff()
+                        .doOnComplete(() ->
+                                completeErrorMessage = "Taking off Done")
+                        .doOnError(throwable ->
+                                completeErrorMessage = "Take off Error: " + ((Action.ActionException) throwable).getCode().toString()))
                 .subscribe(latch::getCount, throwable -> latch.getCount());
     }
 
