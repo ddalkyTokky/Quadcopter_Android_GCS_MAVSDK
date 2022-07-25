@@ -271,9 +271,9 @@ public class DroneRepository {
         }
         mDrone.getAction().arm()
                 .doOnComplete(() ->
-                        completeErrorMessage = "Arming Done")
+                        completeErrorMessage = "Arm Done")
                 .doOnError(throwable ->
-                        completeErrorMessage = ((Action.ActionException) throwable).getCode().toString())
+                        completeErrorMessage = "Arm Error: " + ((Action.ActionException) throwable).getCode().toString())
                 .subscribe(latch::getCount, throwable -> latch.getCount());
     }
 
@@ -285,21 +285,21 @@ public class DroneRepository {
 
         mDrone.getAction().arm()
                 .doOnComplete(() ->
-                        completeErrorMessage = "Arming Done")
+                        completeErrorMessage = "Arm Done")
                 .doOnError(throwable ->
                         completeErrorMessage = "Arm Error: " + ((Action.ActionException) throwable).getCode().toString())
                 .andThen(mDrone.getAction()
                         .setTakeoffAltitude(height)
                         .doOnComplete(() ->
-                                completeErrorMessage = "Setting Takeoff Alt Done")
+                                completeErrorMessage = "Set Takeoff Alt Done")
                         .doOnError(throwable ->
                                 completeErrorMessage
-                                        = "Setting Takeoff Alt Error: "
+                                        = "Set Takeoff Alt Error: "
                                                 + ((Action.ActionException) throwable).getCode().toString()))
                 .andThen(mDrone.getAction()
                         .takeoff()
                         .doOnComplete(() ->
-                                completeErrorMessage = "Taking off Done")
+                                completeErrorMessage = "Take off Done")
                         .doOnError(throwable ->
                                 completeErrorMessage = "Take off Error: " + ((Action.ActionException) throwable).getCode().toString()))
                 .subscribe(latch::getCount, throwable -> latch.getCount());
@@ -314,7 +314,7 @@ public class DroneRepository {
                 .doOnComplete(() ->
                         completeErrorMessage = "Disarm Done")
                 .doOnError(throwable ->
-                        completeErrorMessage = ((Action.ActionException) throwable).getCode().toString())
+                        completeErrorMessage = "Disarm Error: " + ((Action.ActionException) throwable).getCode().toString())
                 .subscribe(latch::getCount, throwable -> latch.getCount());
     }
 
@@ -325,9 +325,9 @@ public class DroneRepository {
         }
         mDrone.getAction().land()
                 .doOnComplete(() ->
-                        completeErrorMessage = "Landing Done")
+                        completeErrorMessage = "Land Done")
                 .doOnError(throwable ->
-                        completeErrorMessage = ((Action.ActionException) throwable).getCode().toString())
+                        completeErrorMessage = "Land Error: " + ((Action.ActionException) throwable).getCode().toString())
                 .subscribe(latch::getCount, throwable -> latch.getCount());
     }
 
@@ -338,9 +338,9 @@ public class DroneRepository {
         }
         mDrone.getAction().returnToLaunch()
                 .doOnComplete(() ->
-                        completeErrorMessage = "Returning Done")
+                        completeErrorMessage = "Return Done")
                 .doOnError(throwable ->
-                        completeErrorMessage = ((Action.ActionException) throwable).getCode().toString())
+                        completeErrorMessage = "Return Error: " + ((Action.ActionException) throwable).getCode().toString())
                 .subscribe(latch::getCount, throwable -> latch.getCount());
     }
 
@@ -426,9 +426,9 @@ public class DroneRepository {
 
         mDrone.getMissionRaw()
                 .uploadMission(missionItems)
-                .doOnComplete(() -> completeErrorMessage = "Uploading Mission Done")
+                .doOnComplete(() -> completeErrorMessage = "Upload Mission Done")
                 .doOnError(throwable ->
-                        completeErrorMessage = ((MissionRaw.MissionRawException) throwable).getCode().toString())
+                        completeErrorMessage = "Upload Mission Error: " + ((MissionRaw.MissionRawException) throwable).getCode().toString())
                 .subscribe(latch::getCount, throwable -> latch.getCount());
     }
 
@@ -441,9 +441,9 @@ public class DroneRepository {
         arm();
 
         mDrone.getMissionRaw().startMission()
-                .doOnComplete(() -> completeErrorMessage = "Starting Mission Done")
+                .doOnComplete(() -> completeErrorMessage = "Start Mission Done")
                 .doOnError(throwable ->
-                        completeErrorMessage = ((MissionRaw.MissionRawException) throwable).getCode().toString())
+                        completeErrorMessage = "Start Mission Error: " + ((MissionRaw.MissionRawException) throwable).getCode().toString())
                 .subscribe(latch::getCount, throwable -> latch.getCount());
     }
 
@@ -455,9 +455,9 @@ public class DroneRepository {
 
         mDrone.getMissionRaw()
                 .pauseMission()
-                .doOnComplete(() -> completeErrorMessage = "Pausing Mission Done")
+                .doOnComplete(() -> completeErrorMessage = "Pause Mission Done")
                 .doOnError(throwable ->
-                        completeErrorMessage = ((MissionRaw.MissionRawException) throwable).getCode().toString());
+                        completeErrorMessage = "Pause Mission Error: " + ((MissionRaw.MissionRawException) throwable).getCode().toString());
     }
 
     public void clearMission() {
@@ -468,9 +468,9 @@ public class DroneRepository {
 
         mDrone.getMissionRaw()
                 .clearMission()
-                .doOnComplete(() -> completeErrorMessage = "Clearing Mission Done")
+                .doOnComplete(() -> completeErrorMessage = "Clear Mission Done")
                 .doOnError(throwable ->
-                        completeErrorMessage = ((MissionRaw.MissionRawException) throwable).getCode().toString())
+                        completeErrorMessage = "Clear Mission Error: " + ((MissionRaw.MissionRawException) throwable).getCode().toString())
                 .subscribe(latch::getCount, throwable -> latch.getCount());
     }
 
@@ -482,9 +482,9 @@ public class DroneRepository {
 
         mDrone.getCamera()
                 .takePhoto()
-                .doOnComplete(() -> completeErrorMessage = "Camera Done")
+                .doOnComplete(() -> completeErrorMessage = "Camera Take Photo Done")
                 .doOnError(throwable ->
-                        completeErrorMessage = ((Camera.CameraException) throwable).getCode().toString())
+                        completeErrorMessage = "Camera Take Photo Error: " + ((Camera.CameraException) throwable).getCode().toString())
                 .subscribe(latch::getCount, throwable -> latch.getCount());
     }
 
@@ -504,9 +504,9 @@ public class DroneRepository {
 
         mDrone.getGeofence()
                 .uploadGeofence(polygons)
-                .doOnComplete(() -> completeErrorMessage = "Setting Geofence Done")
+                .doOnComplete(() -> completeErrorMessage = "Set Geofence Done")
                 .doOnError(throwable ->
-                        completeErrorMessage = ((Geofence.GeofenceException) throwable).getCode().toString())
+                        completeErrorMessage = "Set Geofence Error: " + ((Geofence.GeofenceException) throwable).getCode().toString())
                 .subscribe(latch::getCount, throwable -> latch.getCount());
     }
 
@@ -529,9 +529,9 @@ public class DroneRepository {
 
         mDrone.getGeofence()
                 .uploadGeofence(polygons)
-                .doOnComplete(() -> completeErrorMessage = "Setting Geofence Done")
+                .doOnComplete(() -> completeErrorMessage = "Clear Geofence Done")
                 .doOnError(throwable ->
-                        completeErrorMessage = ((Geofence.GeofenceException) throwable).getCode().toString())
+                        completeErrorMessage = "Clear Geofence Error: " + ((Geofence.GeofenceException) throwable).getCode().toString())
                 .subscribe(latch::getCount, throwable -> latch.getCount());
     }
 
