@@ -7,18 +7,15 @@ import android.content.Intent;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.LiveDataReactiveStreams;
 
 import com.example.googlemapmavsdk.BuildConfig;
 import com.example.googlemapmavsdk.R;
 import com.example.io.TcpInputOutputManager;
-import com.example.models.PositionRelative;
 import com.example.models.Speed;
 import com.google.android.gms.maps.model.LatLng;
 import com.hoho.android.usbserial.driver.UsbSerialDriver;
@@ -28,13 +25,10 @@ import com.hoho.android.usbserial.util.SerialInputOutputManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.CountDownLatch;
 
 import io.mavsdk.System;
@@ -43,10 +37,10 @@ import io.mavsdk.camera.Camera;
 import io.mavsdk.core.Core;
 import io.mavsdk.geofence.Geofence;
 import io.mavsdk.mavsdkserver.MavsdkServer;
-import io.mavsdk.mission.Mission;
 import io.mavsdk.mission_raw.MissionRaw;
 import io.mavsdk.telemetry.Telemetry;
 import io.reactivex.Flowable;
+import io.reactivex.Single;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
@@ -73,10 +67,9 @@ public class DroneRepository {
 
     private static final String INTENT_ACTION_GRANT_USB = BuildConfig.APPLICATION_ID + ".GRANT_USB";
 
-    private LiveData<PositionRelative> mPositionRelativeLiveData;
+    private LiveData<Boolean> mMissionFinishedLiveData;
     private LiveData<Speed> mSpeedLiveData;
     private LiveData<Telemetry.Battery> mBatteryLiveData;
-    private LiveData<Telemetry.GpsInfo> mGpsInfoLiveData;
     private LiveData<Telemetry.Position> mPositionLiveData;
     private LiveData<Telemetry.FlightMode> mFlightModeLiveData;
     private LiveData<Telemetry.EulerAngle> mAttitudeLiveData;
@@ -96,7 +89,6 @@ public class DroneRepository {
 
     private static final float MISSION_HEIGHT = 5f;
     private static final float MISSION_SPEED = 1f;
-    private static final float RTL_RETURN_HEIGHT = 5f;
 
     private String completeErrorMessage;
 
@@ -119,10 +111,8 @@ public class DroneRepository {
             return;
         }
 
-        mPositionRelativeLiveData = null;
         mSpeedLiveData = null;
         mBatteryLiveData = null;
-        mGpsInfoLiveData = null;
         mPositionLiveData = null;
         mFlightModeLiveData = null;
         mAttitudeLiveData = null;
@@ -332,16 +322,22 @@ public class DroneRepository {
                 .subscribe(latch::getCount, throwable -> latch.getCount());
     }
 
-    public void return0() {
+    public void return0(float height) {
         if (usbConnectionStatus == false) {
             Toast.makeText(mAppContext, "Usb not connected", Toast.LENGTH_SHORT).show();
             return;
         }
-        mDrone.getAction().returnToLaunch()
+
+        mDrone.getAction().setReturnToLaunchAltitude(height)
                 .doOnComplete(() ->
-                        completeErrorMessage = "Return Done")
+                        completeErrorMessage = "Set RTL_RETURN_ALT Done")
                 .doOnError(throwable ->
-                        completeErrorMessage = "Return Error: " + ((Action.ActionException) throwable).getCode().toString())
+                        completeErrorMessage = "Set RTL_RETURN_ALT Error: " + ((Action.ActionException) throwable).getCode().toString())
+                .andThen(mDrone.getAction().returnToLaunch()
+                        .doOnComplete(() ->
+                                completeErrorMessage = "Return Done")
+                        .doOnError(throwable ->
+                                completeErrorMessage = "Return Error: " + ((Action.ActionException) throwable).getCode().toString()))
                 .subscribe(latch::getCount, throwable -> latch.getCount());
     }
 
@@ -354,23 +350,6 @@ public class DroneRepository {
         List<MissionRaw.MissionItem> missionItems = new ArrayList<>();
         
         int sequence = 0;
-
-        missionItems.add(new MissionRaw.MissionItem(
-                sequence, //sequence
-                2, //MAV_FRAME_MISSION
-                178, //MAV_CMD_DO_CHANGE_SPEED
-                0, //False True
-                1, //False True
-                1f, //Speed type (0=Airspeed, 1=Ground Speed, 2=Climb Speed, 3=Descent Speed)
-                MISSION_SPEED, //Speed (-1 indicates no change) meter/sec
-                -1f, //Throttle (-1 indicates no change) %
-                0f, //Reserved (set to 0)
-                0, //x
-                0, //y
-                Float.NaN, //z
-                0 //MAV_MISSION_TYPE_MISSION
-        ));
-        sequence += 1;
 
         missionItems.add(new MissionRaw.MissionItem(
                 sequence, //sequence
@@ -388,6 +367,23 @@ public class DroneRepository {
                 0 //MAV_MISSION_TYPE_MISSION
         ));
         missionLatLngs.remove(0);
+        sequence += 1;
+
+        missionItems.add(new MissionRaw.MissionItem(
+                sequence, //sequence
+                2, //MAV_FRAME_MISSION
+                178, //MAV_CMD_DO_CHANGE_SPEED
+                0, //False True
+                1, //False True
+                1f, //Speed type (0=Airspeed, 1=Ground Speed, 2=Climb Speed, 3=Descent Speed)
+                MISSION_SPEED, //Speed (-1 indicates no change) meter/sec
+                -1f, //Throttle (-1 indicates no change) %
+                0f, //Reserved (set to 0)
+                0, //x
+                0, //y
+                Float.NaN, //z
+                0 //MAV_MISSION_TYPE_MISSION
+        ));
         sequence += 1;
 
         for (LatLng latlng : missionLatLngs) {
@@ -428,6 +424,14 @@ public class DroneRepository {
         ));
         sequence += 1;
 
+        /*
+        mDrone.getAction()
+                .setReturnToLaunchAltitude(RTL_RETURN_HEIGHT)
+                .doOnComplete(() -> completeErrorMessage = "Set RTL_RETURN_ALT Done")
+                .doOnError(throwable ->
+                        completeErrorMessage = "Set RTL_RETURN_ALT Error: " + ((Action.ActionException) throwable).getCode().toString())
+                .subscribe(latch::getCount, throwable -> latch.getCount());
+                */
 
         mDrone.getMissionRaw()
                 .uploadMission(missionItems)
@@ -444,16 +448,6 @@ public class DroneRepository {
         }
 
         arm();
-/*
-        mDrone.getAction()
-                .setReturnToLaunchAltitude(RTL_RETURN_HEIGHT)
-                .doOnComplete(() -> completeErrorMessage = "Set RTL_RETURN_ALT Done")
-                .doOnError(throwable ->
-                        completeErrorMessage = "Set RTL_RETURN_ALT Error: " + ((Action.ActionException) throwable).getCode().toString())
-                .subscribe(latch::getCount, throwable -> latch.getCount());
-
-
- */
         mDrone.getMissionRaw().startMission()
                 .doOnComplete(() -> completeErrorMessage = "Start Mission Done")
                 .doOnError(throwable ->
@@ -549,6 +543,23 @@ public class DroneRepository {
                 .subscribe(latch::getCount, throwable -> latch.getCount());
     }
 
+    public void isMissionFinished(){
+        if (usbConnectionStatus == false) {
+            Toast.makeText(mAppContext, "Usb not connected", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (mMissionFinishedLiveData == null) {
+            Single<Boolean> missionFinishedSingle;
+            missionFinishedSingle = mDrone.getMission().isMissionFinished()
+                    .subscribeOn(Schedulers.io());
+
+            mMissionFinishedLiveData = LiveDataReactiveStreams.fromPublisher(missionFinishedSingle);
+        }
+
+        return mMissionFinishedLiveData;
+    }
+
     public LiveData<Telemetry.FlightMode> getFlightMode() {
         if (usbConnectionStatus == false) {
             Toast.makeText(mAppContext, "Usb not connected", Toast.LENGTH_SHORT).show();
@@ -587,24 +598,6 @@ public class DroneRepository {
         }
 
         return mPositionLiveData;
-    }
-
-    public LiveData<Telemetry.GpsInfo> getGpsInfo() {
-        if (usbConnectionStatus == false) {
-            Toast.makeText(mAppContext, "Usb not connected", Toast.LENGTH_SHORT).show();
-            return null;
-        }
-        if (mGpsInfoLiveData == null) {
-            Flowable<Telemetry.GpsInfo> gpsInfoFlowable;
-
-            gpsInfoFlowable = mDrone.getTelemetry().getGpsInfo()
-                    .throttleLast(THROTTLE_TIME_MILLIS, TimeUnit.MILLISECONDS)
-                    .subscribeOn(Schedulers.io());
-
-            mGpsInfoLiveData = LiveDataReactiveStreams.fromPublisher(gpsInfoFlowable);
-        }
-
-        return mGpsInfoLiveData;
     }
 
     public LiveData<Telemetry.Battery> getBattery() {

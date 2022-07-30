@@ -59,6 +59,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final float ZOOM_SCALE = 17f;
     private static final float MISSION_MARKER_COLOR = 180f;
     private static float TAKEOFF_HEIGHT = 5f;
+    private static float RTL_RETURN_HEIGHT = 6f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -161,7 +162,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 mDroneRepository.land();
                 break;
             case R.id.return0:
-                mDroneRepository.return0();
+                mDroneRepository.return0(RTL_RETURN_HEIGHT);
                 break;
             case R.id.uploadMission:
                 if (missionLatLngs.size() >= 1) {
@@ -179,7 +180,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 break;
             case R.id.clearMission:
                 mDroneRepository.clearMission();
-                Toast.makeText(getApplication(), "Clear Mission", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.isMissionFinished:
+                mDroneRepository.isMissionFinished();
                 break;
             case R.id.camera:
                 mDroneRepository.camera();

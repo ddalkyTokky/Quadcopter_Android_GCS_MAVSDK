@@ -30,6 +30,8 @@
         android:title="PauseMission"/>
     <item android:id="@+id/clearMission"
         android:title="ClearMission"/>
+    <item android:id="@+id/isMissionFinished"
+        android:title="IsMissionFinished"/>
     <item android:id="@+id/camera"
         android:title="Camera"/>
     <item android:id="@+id/flightMode"
