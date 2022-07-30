@@ -94,8 +94,9 @@ public class DroneRepository {
 
     private UsbSerialPort mUsbSerialPort;
 
-    private static final float MISSION_HEIGHT = 0.5f;
-    private static final float MISSION_SPEED = 0.9f;
+    private static final float MISSION_HEIGHT = 5f;
+    private static final float MISSION_SPEED = 1f;
+    private static final float RTL_RETURN_HEIGHT = 5f;
 
     private String completeErrorMessage;
 
@@ -351,9 +352,28 @@ public class DroneRepository {
         }
 
         List<MissionRaw.MissionItem> missionItems = new ArrayList<>();
+        
+        int sequence = 0;
 
         missionItems.add(new MissionRaw.MissionItem(
-                0, //sequence
+                sequence, //sequence
+                2, //MAV_FRAME_MISSION
+                178, //MAV_CMD_DO_CHANGE_SPEED
+                0, //False True
+                1, //False True
+                1f, //Speed type (0=Airspeed, 1=Ground Speed, 2=Climb Speed, 3=Descent Speed)
+                MISSION_SPEED, //Speed (-1 indicates no change) meter/sec
+                -1f, //Throttle (-1 indicates no change) %
+                0f, //Reserved (set to 0)
+                0, //x
+                0, //y
+                Float.NaN, //z
+                0 //MAV_MISSION_TYPE_MISSION
+        ));
+        sequence += 1;
+
+        missionItems.add(new MissionRaw.MissionItem(
+                sequence, //sequence
                 3, //MAV_FRAME_GLOBAL_RELATIVE_ALT
                 22, //MAV_CMD_NAV_TAKEOFF
                 1, //False True
@@ -368,33 +388,17 @@ public class DroneRepository {
                 0 //MAV_MISSION_TYPE_MISSION
         ));
         missionLatLngs.remove(0);
+        sequence += 1;
 
-        missionItems.add(new MissionRaw.MissionItem(
-                1, //sequence
-                2, //MAV_FRAME_MISSION
-                178, //MAV_CMD_DO_CHANGE_SPEED
-                0, //False True
-                1, //False True
-                1f, //Speed type (0=Airspeed, 1=Ground Speed, 2=Climb Speed, 3=Descent Speed)
-                MISSION_SPEED, //Speed (-1 indicates no change) meter/sec
-                -1f, //Throttle (-1 indicates no change) %
-                0f, //Reserved (set to 0)
-                0, //x
-                0, //y
-                Float.NaN, //z
-                0 //MAV_MISSION_TYPE_MISSION
-        ));
-
-        int count = 2;
         for (LatLng latlng : missionLatLngs) {
             missionItems.add(new MissionRaw.MissionItem(
-                    count, //sequence
+                    sequence, //sequence
                     3, //MAV_FRAME_GLOBAL_RELATIVE_ALT
                     16, //MAV_CMD_NAV_WAYPOINT
                     0, //False True
                     1, //False True
                     Float.NaN, //Hold time. (ignored by fixed wing, time to stay at waypoint for rotary wing) secs.
-                    Float.NaN, //Acceptance radius (if the sphere with this radius is hit, the waypoint counts as reached) meter.
+                    Float.NaN, //Acceptance radius (if the sphere with this radius is hit, the waypoint sequences as reached) meter.
                     Float.NaN, //0 to pass through the WP, if > 0 radius to pass by WP. Positive value for clockwise orbit, negative value for counter-clockwise orbit. Allows trajectory control.
                                 //meter
                     Float.NaN, //Desired yaw angle at waypoint (rotary wing). NaN to use the current system yaw heading mode (e.g. yaw towards next waypoint, yaw to home, etc.).
@@ -404,11 +408,11 @@ public class DroneRepository {
                     MISSION_HEIGHT, //z
                     0 //MAV_MISSION_TYPE_MISSION
                     ));
-            count += 1;
+            sequence += 1;
         }
 
         missionItems.add(new MissionRaw.MissionItem(
-                count, //sequence
+                sequence, //sequence
                 2, //MAV_FRAME_MISSION
                 20, //MAV_CMD_NAV_RETURN_TO_LAUNCH
                 0, //False True
@@ -422,6 +426,7 @@ public class DroneRepository {
                 0f, //z
                 0 //MAV_MISSION_TYPE_MISSION
         ));
+        sequence += 1;
 
 
         mDrone.getMissionRaw()
@@ -439,7 +444,16 @@ public class DroneRepository {
         }
 
         arm();
+/*
+        mDrone.getAction()
+                .setReturnToLaunchAltitude(RTL_RETURN_HEIGHT)
+                .doOnComplete(() -> completeErrorMessage = "Set RTL_RETURN_ALT Done")
+                .doOnError(throwable ->
+                        completeErrorMessage = "Set RTL_RETURN_ALT Error: " + ((Action.ActionException) throwable).getCode().toString())
+                .subscribe(latch::getCount, throwable -> latch.getCount());
 
+
+ */
         mDrone.getMissionRaw().startMission()
                 .doOnComplete(() -> completeErrorMessage = "Start Mission Done")
                 .doOnError(throwable ->
