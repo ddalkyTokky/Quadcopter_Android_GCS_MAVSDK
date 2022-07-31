@@ -137,8 +137,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         mMarker.remove();
                         LatLng newPosition = new LatLng(currentLat.get(), currentLong.get());
                         mMarker = mMap.addMarker(new MarkerOptions().position(newPosition).title("DRONE"));
-                        //mMap.moveCamera(CameraUpdateFactory.newLatLng(newPosition));
-                        //mMap.moveCamera(CameraUpdateFactory.zoomTo(17));
+                        
+                        mMap.moveCamera(CameraUpdateFactory.newLatLng(
+                                new LatLng(currentLat.get(), currentLong.get())
+                        ));
+                        mMap.moveCamera(CameraUpdateFactory.zoomTo(ZOOM_SCALE));
                     });
 
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(
