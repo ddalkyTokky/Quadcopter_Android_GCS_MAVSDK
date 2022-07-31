@@ -78,7 +78,7 @@ public class DroneRepository {
     private LiveData<Core.ConnectionState> mDroneConnectionStateLiveData;
     private LiveData<MissionRaw.MissionProgress> mMissionProgressLiveData;
 
-    private AtomicReference<Boolean> isMissionFinished = new AtomicReference<>((boolean) false);
+    //private AtomicReference<Boolean> isMissionFinished = new AtomicReference<>((boolean) false);
 
     private CountDownLatch latch = new CountDownLatch(0);
 
@@ -121,6 +121,8 @@ public class DroneRepository {
         mFlightModeLiveData = null;
         mAttitudeLiveData = null;
         mRcStatusLiveData = null;
+        mDroneConnectionStateLiveData = null;
+        mMissionProgressLiveData = null;
 
         if (initializeUSB()) {
             initializeTCP();
