@@ -448,10 +448,10 @@ public class DroneRepository {
                 .subscribe(latch::getCount, throwable -> latch.getCount());
     }
 
-    public void startMission() {
+    public boolean startMission() {
         if (usbConnectionStatus == false) {
             Toast.makeText(mAppContext, "Usb not connected", Toast.LENGTH_SHORT).show();
-            return;
+            return false;
         }
 
         arm();
@@ -460,12 +460,17 @@ public class DroneRepository {
                 .doOnError(throwable ->
                         completeErrorMessage = "Start Mission Error: " + ((MissionRaw.MissionRawException) throwable).getCode().toString())
                 .subscribe(latch::getCount, throwable -> latch.getCount());
+
+        if(completeErrorMessage == "Start Mission Done"){
+            return true;
+        }
+        return false;
     }
 
-    public void pauseMission() {
+    public boolean pauseMission() {
         if (usbConnectionStatus == false) {
             Toast.makeText(mAppContext, "Usb not connected", Toast.LENGTH_SHORT).show();
-            return;
+            return false;
         }
 
         mDrone.getMissionRaw()
@@ -473,6 +478,11 @@ public class DroneRepository {
                 .doOnComplete(() -> completeErrorMessage = "Pause Mission Done")
                 .doOnError(throwable ->
                         completeErrorMessage = "Pause Mission Error: " + ((MissionRaw.MissionRawException) throwable).getCode().toString());
+
+        if(completeErrorMessage == "Pause Mission Done"){
+            return true;
+        }
+        return false;
     }
 
     public void clearMission() {

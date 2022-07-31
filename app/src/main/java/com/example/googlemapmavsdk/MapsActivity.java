@@ -60,6 +60,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private AtomicReference<Integer> totalMission = new AtomicReference<>((int) -1);
     private AtomicReference<Integer> currentMission = new AtomicReference<>((int) -1);
 
+    private boolean onMission = false;
+
     private static final float ZOOM_SCALE = 17f;
     private static final float MISSION_MARKER_COLOR = 180f;
     private static float TAKEOFF_HEIGHT = 3f;
@@ -175,10 +177,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
                 break;
             case R.id.startMission:
-                mDroneRepository.startMission();
+                if(mDroneRepository.startMission() == true){
+                    onMission = true;
+                }
                 break;
             case R.id.pauseMission:
-                mDroneRepository.pauseMission();
+                if(mDroneRepository.pauseMission() == true){
+                    onMission = false;
+                }
                 break;
             case R.id.clearMission:
                 mDroneRepository.clearMission();
@@ -189,8 +195,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         totalMission.set(missionProgress.getTotal());
                         currentMission.set(missionProgress.getCurrent());
 
-                        if(totalMission.get() == currentMission.get()){
+                        if((totalMission.get() == currentMission.get()) && (onMission == true)){
                             mDroneRepository.return0(RTL_RETURN_HEIGHT);
+                            onMission = false;
                         }
                     });
                     Toast.makeText(getApplication(),
