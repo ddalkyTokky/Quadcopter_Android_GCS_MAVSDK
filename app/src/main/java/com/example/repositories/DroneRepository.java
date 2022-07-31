@@ -30,6 +30,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 
 import io.mavsdk.System;
 import io.mavsdk.action.Action;
@@ -42,6 +43,7 @@ import io.mavsdk.telemetry.Telemetry;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import android.os.Handler;
@@ -67,7 +69,6 @@ public class DroneRepository {
 
     private static final String INTENT_ACTION_GRANT_USB = BuildConfig.APPLICATION_ID + ".GRANT_USB";
 
-    private LiveData<Boolean> mMissionFinishedLiveData;
     private LiveData<Speed> mSpeedLiveData;
     private LiveData<Telemetry.Battery> mBatteryLiveData;
     private LiveData<Telemetry.Position> mPositionLiveData;
@@ -75,6 +76,8 @@ public class DroneRepository {
     private LiveData<Telemetry.EulerAngle> mAttitudeLiveData;
     private LiveData<Telemetry.RcStatus> mRcStatusLiveData;
     private LiveData<Core.ConnectionState> mDroneConnectionStateLiveData;
+
+    private AtomicReference<Boolean> isMissionFinished = new AtomicReference<>((boolean) false);
 
     private CountDownLatch latch = new CountDownLatch(0);
 
@@ -286,7 +289,7 @@ public class DroneRepository {
                         .doOnError(throwable ->
                                 completeErrorMessage
                                         = "Set Takeoff Alt Error: "
-                                                + ((Action.ActionException) throwable).getCode().toString()))
+                                        + ((Action.ActionException) throwable).getCode().toString()))
                 .andThen(mDrone.getAction()
                         .takeoff()
                         .doOnComplete(() ->
@@ -348,7 +351,7 @@ public class DroneRepository {
         }
 
         List<MissionRaw.MissionItem> missionItems = new ArrayList<>();
-        
+
         int sequence = 0;
 
         missionItems.add(new MissionRaw.MissionItem(
@@ -396,14 +399,14 @@ public class DroneRepository {
                     Float.NaN, //Hold time. (ignored by fixed wing, time to stay at waypoint for rotary wing) secs.
                     Float.NaN, //Acceptance radius (if the sphere with this radius is hit, the waypoint sequences as reached) meter.
                     Float.NaN, //0 to pass through the WP, if > 0 radius to pass by WP. Positive value for clockwise orbit, negative value for counter-clockwise orbit. Allows trajectory control.
-                                //meter
+                    //meter
                     Float.NaN, //Desired yaw angle at waypoint (rotary wing). NaN to use the current system yaw heading mode (e.g. yaw towards next waypoint, yaw to home, etc.).
-                                //degree °
+                    //degree °
                     (int) (latlng.latitude * 10000000), //x
                     (int) (latlng.longitude * 10000000), //y
                     MISSION_HEIGHT, //z
                     0 //MAV_MISSION_TYPE_MISSION
-                    ));
+            ));
             sequence += 1;
         }
 
@@ -530,8 +533,8 @@ public class DroneRepository {
         List<Geofence.Point> points = new ArrayList<>();
         List<Geofence.Polygon> polygons = new ArrayList<>();
 
-        points.add(new Geofence.Point((double) 0,(double) 0));
-        points.add(new Geofence.Point((double) 1,(double) 1));
+        points.add(new Geofence.Point((double) 0, (double) 0));
+        points.add(new Geofence.Point((double) 1, (double) 1));
 
         polygons.add(new Geofence.Polygon(points, Geofence.Polygon.FenceType.INCLUSION));
 
@@ -543,21 +546,23 @@ public class DroneRepository {
                 .subscribe(latch::getCount, throwable -> latch.getCount());
     }
 
-    public void isMissionFinished(){
+    public Boolean isMissionFinished() {
         if (usbConnectionStatus == false) {
             Toast.makeText(mAppContext, "Usb not connected", Toast.LENGTH_SHORT).show();
-            return;
+            return null;
         }
 
-        if (mMissionFinishedLiveData == null) {
-            Single<Boolean> missionFinishedSingle;
-            missionFinishedSingle = mDrone.getMission().isMissionFinished()
-                    .subscribeOn(Schedulers.io());
+        mDrone.getMission()
+                .isMissionFinished()
+                .doOnSuccess(missionFinished -> {
+                    isMissionFinished.set(missionFinished);
+                })
+                .doOnError(throwable -> {
+                    isMissionFinished.set(false);
+                })
+                .subscribeOn(Schedulers.io());
 
-            mMissionFinishedLiveData = LiveDataReactiveStreams.fromPublisher(missionFinishedSingle);
-        }
-
-        return mMissionFinishedLiveData;
+        return isMissionFinished.get();
     }
 
     public LiveData<Telemetry.FlightMode> getFlightMode() {
@@ -692,25 +697,6 @@ public class DroneRepository {
         return mDroneConnectionStateLiveData;
     }
 }
-    /*
-    public void destroy() {
-        mCompositeDisposable.dispose();
-
-        if(mDrone != null){
-            mDrone.dispose();
-        }
-        if(mMavsdkServer != null){
-            mMavsdkServer.stop();
-        }
-        if (mSerialManager != null) {
-            mSerialManager.stop();
-        }
-        if (mTcpManager != null) {
-            mTcpManager.stop();
-        }
-    }
-    */
-
     /*
     Telemetry - Allow users to get vehicle telemetry and state information.
             - (e.g. battery, GPS, RC connection, flight mode etc.) and set telemetry update rates.

@@ -183,6 +183,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 break;
             case R.id.isMissionFinished:
                 mDroneRepository.isMissionFinished();
+                try {
+                    Toast.makeText(getApplication(),
+                            mDroneRepository.isMissionFinished().toString(),
+                            Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                }
                 break;
             case R.id.camera:
                 mDroneRepository.camera();
