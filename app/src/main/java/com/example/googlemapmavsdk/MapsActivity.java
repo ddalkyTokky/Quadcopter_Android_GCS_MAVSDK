@@ -144,11 +144,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         mMap.moveCamera(CameraUpdateFactory.zoomTo(ZOOM_SCALE));
                     });
 
-                    mMap.moveCamera(CameraUpdateFactory.newLatLng(
-                            new LatLng(currentLat.get(), currentLong.get())
-                    ));
-                    mMap.moveCamera(CameraUpdateFactory.zoomTo(ZOOM_SCALE));
-
                     Toast.makeText(getApplication(), "Alt : " + currentAlt.get(), Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
                 }
