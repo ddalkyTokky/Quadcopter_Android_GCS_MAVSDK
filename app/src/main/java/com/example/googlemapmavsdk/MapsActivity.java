@@ -20,6 +20,7 @@ import com.example.googlemapmavsdk.databinding.ActivityMapsBinding;
 import com.example.repositories.DroneRepository;
 
 import java.lang.reflect.Array;
+import java.net.InterfaceAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -56,10 +57,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private AtomicReference<Boolean> droneConnectionState = new AtomicReference<>((boolean) false);
 
+    private AtomicReference<Integer> totalMission = new AtomicReference<>((int) -1);
+    private AtomicReference<Integer> currentMission = new AtomicReference<>((int) -1);
+
     private static final float ZOOM_SCALE = 17f;
     private static final float MISSION_MARKER_COLOR = 180f;
-    private static float TAKEOFF_HEIGHT = 5f;
-    private static float RTL_RETURN_HEIGHT = 6f;
+    private static float TAKEOFF_HEIGHT = 3f;
+    private static float RTL_RETURN_HEIGHT = 7f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -181,7 +185,28 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             case R.id.clearMission:
                 mDroneRepository.clearMission();
                 break;
-            case R.id.isMissionFinished:
+            case R.id.missionProgress:
+                try {
+                    mDroneRepository.getMissionProgress().observe(this, missionProgress -> {
+                        totalMission.set(missionProgress.getTotal());
+                        currentMission.set(missionProgress.getCurrent());
+
+                        if(totalMission.get() == currentMission.get()){
+                            mDroneRepository.return0(RTL_RETURN_HEIGHT);
+                        }
+                    });
+                    Toast.makeText(getApplication(),
+                            "Total: " + totalMission.get()
+                                    + "Current: " + currentMission.get(),
+                            Toast.LENGTH_SHORT).show();
+
+                    if(totalMission.get() == currentMission.get()){
+                        Toast.makeText(getApplication(),"Mission Finished", Toast.LENGTH_SHORT).show();
+                    }
+                } catch (Exception e) {
+                }
+                break;
+            /*case R.id.isMissionFinished:
                 mDroneRepository.isMissionFinished();
                 try {
                     Toast.makeText(getApplication(),
@@ -189,7 +214,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
                 }
-                break;
+                break;*/
             case R.id.camera:
                 mDroneRepository.camera();
                 break;

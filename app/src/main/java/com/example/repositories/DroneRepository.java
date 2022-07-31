@@ -76,6 +76,7 @@ public class DroneRepository {
     private LiveData<Telemetry.EulerAngle> mAttitudeLiveData;
     private LiveData<Telemetry.RcStatus> mRcStatusLiveData;
     private LiveData<Core.ConnectionState> mDroneConnectionStateLiveData;
+    private LiveData<MissionRaw.MissionProgress> mMissionProgressLiveData;
 
     private AtomicReference<Boolean> isMissionFinished = new AtomicReference<>((boolean) false);
 
@@ -410,6 +411,7 @@ public class DroneRepository {
             sequence += 1;
         }
 
+        /*
         missionItems.add(new MissionRaw.MissionItem(
                 sequence, //sequence
                 2, //MAV_FRAME_MISSION
@@ -425,7 +427,7 @@ public class DroneRepository {
                 0f, //z
                 0 //MAV_MISSION_TYPE_MISSION
         ));
-        sequence += 1;
+        sequence += 1;*/
 
         /*
         mDrone.getAction()
@@ -546,6 +548,26 @@ public class DroneRepository {
                 .subscribe(latch::getCount, throwable -> latch.getCount());
     }
 
+    public LiveData<MissionRaw.MissionProgress> getMissionProgress() {
+        if (usbConnectionStatus == false) {
+            Toast.makeText(mAppContext, "Usb not connected", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+        if (mMissionProgressLiveData == null) {
+            Flowable<MissionRaw.MissionProgress> missionProgressFlowable;
+
+            missionProgressFlowable = mDrone.getMissionRaw()
+                    .getMissionProgress()
+                    .distinctUntilChanged()
+                    .subscribeOn(Schedulers.io());
+
+            mMissionProgressLiveData = LiveDataReactiveStreams.fromPublisher(missionProgressFlowable);
+        }
+
+        return mMissionProgressLiveData;
+    }
+
+    /*
     public Boolean isMissionFinished() {
         if (usbConnectionStatus == false) {
             Toast.makeText(mAppContext, "Usb not connected", Toast.LENGTH_SHORT).show();
@@ -563,7 +585,7 @@ public class DroneRepository {
                 .subscribeOn(Schedulers.io());
 
         return isMissionFinished.get();
-    }
+    }*/
 
     public LiveData<Telemetry.FlightMode> getFlightMode() {
         if (usbConnectionStatus == false) {
@@ -576,8 +598,6 @@ public class DroneRepository {
             flightModeFlowable = mDrone.getTelemetry().getFlightMode()
                     .distinctUntilChanged()
                     .subscribeOn(Schedulers.io());
-
-            //positionFlowable.onBackpressureLatest();
 
             mFlightModeLiveData = LiveDataReactiveStreams.fromPublisher(flightModeFlowable);
         }
@@ -596,8 +616,6 @@ public class DroneRepository {
             positionFlowable = mDrone.getTelemetry().getPosition()
                     .throttleLast(THROTTLE_TIME_MILLIS, TimeUnit.MILLISECONDS)
                     .subscribeOn(Schedulers.io());
-
-            //positionFlowable.onBackpressureLatest();
 
             mPositionLiveData = LiveDataReactiveStreams.fromPublisher(positionFlowable);
         }
