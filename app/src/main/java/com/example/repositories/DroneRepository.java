@@ -49,7 +49,7 @@ import io.reactivex.schedulers.Schedulers;
 import android.os.Handler;
 import android.os.Looper;
 
-public class DroneRepository {
+public class  DroneRepository {
     private static final String TAG = "LOG_" + DroneRepository.class.getSimpleName();
 
     private static final String MAVSDK_SERVER_IP = "127.0.0.1";
@@ -92,7 +92,7 @@ public class DroneRepository {
     private UsbSerialPort mUsbSerialPort;
 
     private static final float MISSION_HEIGHT = 5f;
-    private static final float MISSION_SPEED = 1f;
+    private static final float MISSION_SPEED = 2f;
 
     private String completeErrorMessage;
 
@@ -448,41 +448,33 @@ public class DroneRepository {
                 .subscribe(latch::getCount, throwable -> latch.getCount());
     }
 
-    public boolean startMission() {
+    public void startMission() {
         if (usbConnectionStatus == false) {
             Toast.makeText(mAppContext, "Usb not connected", Toast.LENGTH_SHORT).show();
-            return false;
+            return;
         }
 
         arm();
         mDrone.getMissionRaw().startMission()
                 .doOnComplete(() -> completeErrorMessage = "Start Mission Done")
                 .doOnError(throwable ->
-                        completeErrorMessage = "Start Mission Error: " + ((MissionRaw.MissionRawException) throwable).getCode().toString())
+                        completeErrorMessage = "Start Mission Error: "
+                                + ((MissionRaw.MissionRawException) throwable).getCode().toString())
                 .subscribe(latch::getCount, throwable -> latch.getCount());
-
-        if(completeErrorMessage == "Start Mission Done"){
-            return true;
-        }
-        return false;
     }
 
-    public boolean pauseMission() {
+    public void pauseMission() {
         if (usbConnectionStatus == false) {
             Toast.makeText(mAppContext, "Usb not connected", Toast.LENGTH_SHORT).show();
-            return false;
+            return;
         }
 
         mDrone.getMissionRaw()
                 .pauseMission()
                 .doOnComplete(() -> completeErrorMessage = "Pause Mission Done")
                 .doOnError(throwable ->
-                        completeErrorMessage = "Pause Mission Error: " + ((MissionRaw.MissionRawException) throwable).getCode().toString());
-
-        if(completeErrorMessage == "Pause Mission Done"){
-            return true;
-        }
-        return false;
+                        completeErrorMessage = "Pause Mission Error: "
+                                + ((MissionRaw.MissionRawException) throwable).getCode().toString());
     }
 
     public void clearMission() {

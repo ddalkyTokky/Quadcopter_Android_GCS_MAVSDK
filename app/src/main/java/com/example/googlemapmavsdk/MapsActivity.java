@@ -60,8 +60,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private AtomicReference<Integer> totalMission = new AtomicReference<>((int) -1);
     private AtomicReference<Integer> currentMission = new AtomicReference<>((int) -1);
 
-    private boolean onMission = false;
-
     private static final float ZOOM_SCALE = 17f;
     private static final float MISSION_MARKER_COLOR = 180f;
     private static float TAKEOFF_HEIGHT = 3f;
@@ -177,14 +175,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
                 break;
             case R.id.startMission:
-                if(mDroneRepository.startMission() == true){
-                    onMission = true;
-                }
+                mDroneRepository.startMission();
                 break;
             case R.id.pauseMission:
-                if(mDroneRepository.pauseMission() == true){
-                    onMission = false;
-                }
+                mDroneRepository.pauseMission();
                 break;
             case R.id.clearMission:
                 mDroneRepository.clearMission();
@@ -195,19 +189,25 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         totalMission.set(missionProgress.getTotal());
                         currentMission.set(missionProgress.getCurrent());
 
-                        if((totalMission.get() == currentMission.get()) && (onMission == true)){
-                            mDroneRepository.return0(RTL_RETURN_HEIGHT);
-                            onMission = false;
+                        int temp_total = totalMission.get();
+                        int temp_current = currentMission.get();
+
+                        if(temp_total == temp_current){
+                            if(temp_total > 0){
+                                //mDroneRepository.return0(RTL_RETURN_HEIGHT);
+                                //totalMission.set(-1);
+                                //currentMission.set(-1);
+                            }
                         }
                     });
                     Toast.makeText(getApplication(),
                             "Total: " + totalMission.get()
-                                    + "Current: " + currentMission.get(),
+                                    + " Current: " + currentMission.get(),
                             Toast.LENGTH_SHORT).show();
 
-                    if(totalMission.get() == currentMission.get()){
+                    /*if(totalMission.get() == currentMission.get()){
                         Toast.makeText(getApplication(),"Mission Finished", Toast.LENGTH_SHORT).show();
-                    }
+                    }*/
                 } catch (Exception e) {
                 }
                 break;
@@ -280,12 +280,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 "Preparing... Press Again.", Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(getApplication(),
-                                "Pitch : " + eulerPitch + "°", Toast.LENGTH_SHORT).show();
-                        Toast.makeText(getApplication(),
-                                "Roll : " + eulerRoll + "°", Toast.LENGTH_SHORT).show();
-                        Toast.makeText(getApplication(),
-                                "Yaw : " + eulerYaw + "°", Toast.LENGTH_SHORT).show();
-                    }
+                                eulerRoll.get() + "° : "
+                                + eulerPitch.get() + "° : "
+                                + eulerYaw.get() + "°",
+                                Toast.LENGTH_SHORT).show();
+                        }
                 } catch (Exception e) {
                 }
                 break;
