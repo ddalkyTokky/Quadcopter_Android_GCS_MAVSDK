@@ -38,6 +38,7 @@ import io.mavsdk.camera.Camera;
 import io.mavsdk.core.Core;
 import io.mavsdk.geofence.Geofence;
 import io.mavsdk.mavsdkserver.MavsdkServer;
+import io.mavsdk.mission.Mission;
 import io.mavsdk.mission_raw.MissionRaw;
 import io.mavsdk.telemetry.Telemetry;
 import io.reactivex.Flowable;
@@ -77,8 +78,7 @@ public class  DroneRepository {
     private LiveData<Telemetry.RcStatus> mRcStatusLiveData;
     private LiveData<Core.ConnectionState> mDroneConnectionStateLiveData;
     private LiveData<MissionRaw.MissionProgress> mMissionProgressLiveData;
-
-    //private AtomicReference<Boolean> isMissionFinished = new AtomicReference<>((boolean) false);
+    private LiveData<Boolean> mIsMissionFinishedLiveData;
 
     private CountDownLatch latch = new CountDownLatch(0);
 
@@ -123,6 +123,7 @@ public class  DroneRepository {
         mRcStatusLiveData = null;
         mDroneConnectionStateLiveData = null;
         mMissionProgressLiveData = null;
+        mIsMissionFinishedLiveData = null;
 
         if (initializeUSB()) {
             initializeTCP();
@@ -455,11 +456,13 @@ public class  DroneRepository {
         }
 
         arm();
-        mDrone.getMissionRaw().startMission()
+
+        mDrone.getMission()
+                .startMission()
                 .doOnComplete(() -> completeErrorMessage = "Start Mission Done")
                 .doOnError(throwable ->
                         completeErrorMessage = "Start Mission Error: "
-                                + ((MissionRaw.MissionRawException) throwable).getCode().toString())
+                                + ((Mission.MissionException) throwable).getCode().toString())
                 .subscribe(latch::getCount, throwable -> latch.getCount());
     }
 
@@ -469,12 +472,13 @@ public class  DroneRepository {
             return;
         }
 
-        mDrone.getMissionRaw()
+        mDrone.getMission()
                 .pauseMission()
                 .doOnComplete(() -> completeErrorMessage = "Pause Mission Done")
                 .doOnError(throwable ->
                         completeErrorMessage = "Pause Mission Error: "
-                                + ((MissionRaw.MissionRawException) throwable).getCode().toString());
+                                + ((Mission.MissionException) throwable).getCode().toString())
+                .subscribe(latch::getCount, throwable -> latch.getCount());
     }
 
     public void clearMission() {
@@ -483,11 +487,11 @@ public class  DroneRepository {
             return;
         }
 
-        mDrone.getMissionRaw()
+        mDrone.getMission()
                 .clearMission()
                 .doOnComplete(() -> completeErrorMessage = "Clear Mission Done")
                 .doOnError(throwable ->
-                        completeErrorMessage = "Clear Mission Error: " + ((MissionRaw.MissionRawException) throwable).getCode().toString())
+                        completeErrorMessage = "Clear Mission Error: " + ((Mission.MissionException) throwable).getCode().toString())
                 .subscribe(latch::getCount, throwable -> latch.getCount());
     }
 
@@ -571,25 +575,26 @@ public class  DroneRepository {
         return mMissionProgressLiveData;
     }
 
-    /*
-    public Boolean isMissionFinished() {
+    public LiveData<Boolean> isMissionFinished() {
         if (usbConnectionStatus == false) {
             Toast.makeText(mAppContext, "Usb not connected", Toast.LENGTH_SHORT).show();
             return null;
         }
 
-        mDrone.getMission()
-                .isMissionFinished()
-                .doOnSuccess(missionFinished -> {
-                    isMissionFinished.set(missionFinished);
-                })
-                .doOnError(throwable -> {
-                    isMissionFinished.set(false);
-                })
-                .subscribeOn(Schedulers.io());
+        if (mIsMissionFinishedLiveData == null) {
+            Flowable<Boolean> isMissionFinishedFlowable;
 
-        return isMissionFinished.get();
-    }*/
+            isMissionFinishedFlowable = mDrone.getMission()
+                    .isMissionFinished()
+                    .toFlowable()
+                    .distinctUntilChanged()
+                    .subscribeOn(Schedulers.io());
+
+            mIsMissionFinishedLiveData = LiveDataReactiveStreams.fromPublisher(isMissionFinishedFlowable);
+        }
+
+        return mIsMissionFinishedLiveData;
+    }
 
     public LiveData<Telemetry.FlightMode> getFlightMode() {
         if (usbConnectionStatus == false) {

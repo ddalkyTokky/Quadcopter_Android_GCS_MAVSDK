@@ -32,10 +32,8 @@
         android:title="ClearMission"/>
     <item android:id="@+id/missionProgress"
         android:title="MissionProgress"/>
-    <!--
     <item android:id="@+id/isMissionFinished"
         android:title="IsMissionFinished"/>
-        -->
     <item android:id="@+id/camera"
         android:title="Camera"/>
     <item android:id="@+id/flightMode"
