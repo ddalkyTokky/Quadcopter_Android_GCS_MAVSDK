@@ -26,7 +26,7 @@ Author Autonomia (KR) Inc. Lee Soon Yong
 2 - 1 - 1. Commands
 -------------
 
- - Arm 
+ - Arm   
  Arm the drone.
  - Takeoff
  Takeoff the drone. The function have 1 float parameter. Takeoff Altitude.
