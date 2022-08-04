@@ -1,6 +1,8 @@
 GoogleMap Mavsdk Android Test App
 User Guide
+=============
 AuthorAutonomia (KR) Inc.Lee Soon Yong
+-------------
 
 1 - 1. MAVSDK & Software
  In this project, we developed this app for GCS system. (Ground Control System) We used Opensource project MAVSDK. The target device is Pixhawk4. Look at the link below for Mavsdk.
