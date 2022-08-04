@@ -1,10 +1,11 @@
 GoogleMap Mavsdk Android Test App
 User Guide
 =============
-AuthorAutonomia (KR) Inc.Lee Soon Yong
+Author Autonomia (KR) Inc. Lee Soon Yong
 -------------
 
 1 - 1. MAVSDK & Software
+-------------
  In this project, we developed this app for GCS system. (Ground Control System) We used Opensource project MAVSDK. The target device is Pixhawk4. Look at the link below for Mavsdk.
 - https://mavsdk.mavlink.io/main/en/index.html
  
@@ -17,9 +18,12 @@ AuthorAutonomia (KR) Inc.Lee Soon Yong
 - https://github.com/ddalkyTokky/GoogleMapMavsdk
 
 1 - 2. Communication & Hardware
+-------------
  The goal of GCS development TestApp is to build up the communication between 'Android' device and the drone based on 'Pixhawk4' FC. We are going to use Holybro V3 Telemetry Radio device, instead of using direct USB connection between Android device and Pixhawk4 drone. Therfore, appropriate Usb cable connection between Android device and Telemetry Radio SIK must be needed.
 2 - 1. Test App Functions
+-------------
 2 - 1 - 1. Commands
+-------------
  - Arm
  Arm the drone.
  - Takeoff
@@ -44,6 +48,7 @@ AuthorAutonomia (KR) Inc.Lee Soon Yong
  - ClearGeofence
  I could not find clearGeofence Function in Mavsdk Android. So I occuer error on SetGeofence to cause Error. In this case, existing Geofence is deleted.
 2 - 1 - 2. Data Floating
+-------------
  - WHERE?
  Position Of the drone. Red marker will move. And Altitude will appear through Toast message.
  - MissionProgress
@@ -61,6 +66,7 @@ AuthorAutonomia (KR) Inc.Lee Soon Yong
  - DroneConnectionState
  ConnectoinState between App & drone. This works fine.
 2 - 1 - 3. etc.
+-------------
  - CONNECT
  Check for Usb Connection with Telemetry Radio SIK. You have to press it until you have the message “Usb Connected” or “Working Connection Exist.”. The list of Available Telemetry devices or other Usb devices are comment below.
 https://github.com/mik3y/usb-serial-for-android/blob/master/usbSerialExamples/src/main/res/xml/device_filter.xml
