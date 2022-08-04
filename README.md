@@ -77,3 +77,8 @@ Author Autonomia (KR) Inc. Lee Soon Yong
 https://github.com/mik3y/usb-serial-for-android/blob/master/usbSerialExamples/src/main/res/xml/device_filter.xml
  - PrintErrorMessage   
  Look at the codes on “2 - 1 - 1. Commands”. This function must be called after you make commands on the drone. This function will show you Complete message or Error Message. After you press it, this function will be reset. So you can see Complete/Error message only once.
+ 
+ 
+![KakaoTalk_20220804_224015444](https://user-images.githubusercontent.com/47583083/182861623-818341b2-d972-4f57-a0f2-6a74c07f8d99.jpg)
+![KakaoTalk_20220804_224015444_01](https://user-images.githubusercontent.com/47583083/182861634-a369a9ab-1c52-4268-8077-58d0f621e20a.jpg)
+![KakaoTalk_20220804_224015444_02](https://user-images.githubusercontent.com/47583083/182861648-609d39f9-5d71-4816-97fe-43b19f9292b1.jpg)
