@@ -20,6 +20,7 @@ Author Autonomia (KR) Inc. Lee Soon Yong
 1 - 2. Communication & Hardware
 -------------
  The goal of GCS development TestApp is to build up the communication between 'Android' device and the drone based on 'Pixhawk4' FC. We are going to use Holybro V3 Telemetry Radio device, instead of using direct USB connection between Android device and Pixhawk4 drone. Therfore, appropriate Usb cable connection between Android device and Telemetry Radio SIK must be needed.
+ 
 2 - 1. Test App Functions
 -------------
 2 - 1 - 1. Commands
@@ -47,6 +48,7 @@ Author Autonomia (KR) Inc. Lee Soon Yong
  Check for Parameters before you use this function. “FenceType.INCLUSION” means “inside the polygon” is forbidden flight area. Just like UploadMission, cyan Markers will be the polygon points. Be careful about order of Markers. If you try to draw squre Geofence, according to the order of markers, it could be “sandglass” shape.
  - ClearGeofence
  I could not find clearGeofence Function in Mavsdk Android. So I occuer error on SetGeofence to cause Error. In this case, existing Geofence is deleted.
+ 
 2 - 1 - 2. Data Floating
 -------------
  - WHERE?
@@ -65,6 +67,7 @@ Author Autonomia (KR) Inc. Lee Soon Yong
  Connection status betweeen RC controller & drone. But this functoin doesnt work appropriately.
  - DroneConnectionState
  ConnectoinState between App & drone. This works fine.
+ 
 2 - 1 - 3. etc.
 -------------
  - CONNECT
