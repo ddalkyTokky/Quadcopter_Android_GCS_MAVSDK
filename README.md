@@ -5,10 +5,11 @@
 # ~~GoogleMap Mavsdk Android Test App User Guide~~ (RENAMED REPOSITORY)
 # Quadcopter_Android_GCS_MAVSDK User Guide
 ## Author Autonomia (KR) Inc. Lee Soon Yong
-## Android 11 (SDK 30)
 
 1 - 1. MAVSDK & Software
 -------------
+ Android 11 (SDK 30)
+
  In this project, we developed this app for GCS system. (Ground Control System) We used Opensource project MAVSDK. The target device is Pixhawk4. Look at the link below for Mavsdk.
 - https://mavsdk.mavlink.io/main/en/index.html
  
