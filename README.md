@@ -1,3 +1,7 @@
+# Other Branches
+>[main](https://github.com/ddalkyTokky/Quadcopter_Android_GCS_MAVSDK/tree/main)          
+>[test](https://github.com/ddalkyTokky/Quadcopter_Android_GCS_MAVSDK/tree/test)
+
 # ~~GoogleMap Mavsdk Android Test App User Guide~~ (RENAMED REPOSITORY)
 # Quadcopter_Android_GCS_MAVSDK User Guide
 ## Author Autonomia (KR) Inc. Lee Soon Yong
