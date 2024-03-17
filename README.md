@@ -1,10 +1,8 @@
-GoogleMap Mavsdk Android Test App
-User Guide
+# GoogleMap Mavsdk Android Test App
+## User Guide
 =============
-Author Autonomia (KR) Inc. Lee Soon Yong
--------------
-
-# Android 11 (SDK 30)
+## Author Autonomia (KR) Inc. Lee Soon Yong
+## Android 11 (SDK 30)
 
 1 - 1. MAVSDK & Software
 -------------
