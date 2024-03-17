@@ -1,3 +1,7 @@
+# Other Branches
+>[main](https://github.com/ddalkyTokky/Quadcopter_Android_GCS_MAVSDK/tree/main)          
+>[test](https://github.com/ddalkyTokky/Quadcopter_Android_GCS_MAVSDK/tree/test)
+
 1. Push Connect botton at least 3 times after you attach your telemetry on your phone.
 2. Connect button ONLY ACTIVE ONCE. Once You established a connection, and plug out your telemetry RADIO, you must kill this app and re-run.
 3. Where? button will make a marker of your GPS position. If there is GPS signal.
