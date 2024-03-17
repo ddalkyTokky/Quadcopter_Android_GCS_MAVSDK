@@ -1,4 +1,5 @@
-# GoogleMap Mavsdk Android Test App User Guide
+# Quadcopter_Android_GCS_MAVSDK User Guide
+~~# GoogleMap Mavsdk Android Test App User Guide~~
 ## Author Autonomia (KR) Inc. Lee Soon Yong
 ## Android 11 (SDK 30)
 
