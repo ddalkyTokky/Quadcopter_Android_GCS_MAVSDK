@@ -8,7 +8,7 @@
 
 1 - 1. MAVSDK & Software
 -------------
- Android 11 (SDK 30)
+ _**Android 11 (SDK 30)**_
 
  In this project, we developed this app for GCS system. (Ground Control System) We used Opensource project MAVSDK. The target device is Pixhawk4. Look at the link below for Mavsdk.
 - https://mavsdk.mavlink.io/main/en/index.html
